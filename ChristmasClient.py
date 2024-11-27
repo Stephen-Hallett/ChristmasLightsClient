@@ -36,8 +36,11 @@ try:
     while True:
         start = time.time()
         lights.setStrip()
-        lights.pattern.insert(0, lights.pattern[-1])
-        lights.pattern.pop(-1) 
+        if lights.chasing > 0:
+            lights.pattern.insert(0, lights.pattern[-1])
+            lights.pattern.pop(-1) 
+        
+
         current = time.time()-start    
         if current < lights.chasing:
             time.sleep(lights.chasing - current)
