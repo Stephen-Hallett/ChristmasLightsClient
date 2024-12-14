@@ -30,6 +30,7 @@ off = {
 
 try:
     pattern = getPattern()
+    print(f"Using pattern {pattern['name']}.")
     start = time.time()
     lights.setPattern(pattern)
     lights.begin()
