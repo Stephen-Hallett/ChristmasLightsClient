@@ -49,7 +49,8 @@ try:
 
         if lights.chasing:
             current = time.time() - start
-            time.sleep(lights.chasing - (current % lights.chasing))
+            if (lights.chasing - (current % lights.chasing)) > 0.02:
+                time.sleep(lights.chasing - (current % lights.chasing))
         if lights.sparkle:
             time.sleep(0.1)
         lights.show()
