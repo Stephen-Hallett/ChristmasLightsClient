@@ -1,10 +1,9 @@
 import math
 
-import os
 import requests
 
-
 IP_ADDRESS = "192.168.1.12:81"
+
 
 def getPattern() -> dict:
     default = {
@@ -12,7 +11,7 @@ def getPattern() -> dict:
         "name": "Peppermint",
         "pattern": ["#ffffff", "#ff0000", "#ffffff", "#00c90e"],
         "active": True,
-        "effects": {"breathing": 0, "chasing": 0.09, "sparkle": 0},
+        "effects": {"breathing": 0, "chasing": 0.09, "sparkle": 0, "decibels": 0},
     }
     try:
         res = requests.get(f"http://{IP_ADDRESS}/patterns/active")

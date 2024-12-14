@@ -24,7 +24,7 @@ off = {
     "name": "Off",
     "pattern": ["#000000"],
     "active": True,
-    "effects": {"breathing": 0, "chasing": 0, "sparkle": 0},
+    "effects": {"breathing": 0, "chasing": 0, "sparkle": 0, "decibels": 0},
 }
 
 
@@ -41,7 +41,7 @@ try:
             lights.setPattern(getPattern())
             start = time.time()
         lights.setStrip()
-        if lights.chasing > 0:
+        if lights.chasing > 0 and not lights.decibels:
             lights.pattern.insert(0, lights.pattern[-1])
             lights.pattern.pop(-1)
         if lights.breathing > 0:
