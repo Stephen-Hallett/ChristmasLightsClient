@@ -1,5 +1,4 @@
 import logging
-import math
 from collections import deque
 from math import ceil
 from queue import Queue
@@ -76,6 +75,7 @@ class ChristmasLights(PixelStrip):
                 for col in self.pattern
                 for _ in range(100)  # This is the LED count TODO: Find var name
             ]
+            self.start_index = 0
 
     def getSparkle(self) -> bool:
         return uniform(0, 1) >= self.sparkle  # NOQA
@@ -102,11 +102,8 @@ class ChristmasLights(PixelStrip):
                 : self.numPixels()
             ]
         else:
-            db = self.getSound()
-            print(db)
-            start_index = math.floor((db / self.decibels) * self.num_starts)
             full_pattern = self.long_pattern[
-                start_index : start_index + 100
+                self.start_index : self.start_index + 100
             ]  # TODO: Find var name
         for i, pix in enumerate(full_pattern):
             self[i] = self.getNewValue(pix)
