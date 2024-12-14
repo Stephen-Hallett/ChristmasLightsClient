@@ -44,7 +44,7 @@ class ChristmasLights(PixelStrip):
         """
         rms = np.sqrt(np.mean(sig**2))  # Root Mean Square
         if rms > 0.01:
-            return max(20 * np.log10(rms), 0) ** 1.25  # Convert to dB
+            return (max(20 * np.log10(rms), 0) - 19) ** 1.5  # Convert to dB
         return 0  # Handle silence
 
     def _callback(self, input_data, frame_count, time_info, flags):
@@ -104,6 +104,6 @@ class ChristmasLights(PixelStrip):
         else:
             full_pattern = self.long_pattern[
                 self.start_index : self.start_index + 100
-            ]  # TODO: Find var name
+                ][::-1]  # TODO: Find var name
         for i, pix in enumerate(full_pattern):
             self[i] = self.getNewValue(pix)
