@@ -1,20 +1,26 @@
 import math
 
+import os
 import requests
 
 
+IP_ADDRESS = "192.168.1.12:81"
+
 def getPattern() -> dict:
-    off = {
-        "id": 1,
-        "name": "Off",
-        "pattern": ["#000000"],
+    default = {
+        "id": 3,
+        "name": "Peppermint",
+        "pattern": ["#ffffff", "#ff0000", "#ffffff", "#00c90e"],
         "active": True,
-        "effects": {"breathing": 0, "chasing": 0, "sparkle": 0},
+        "effects": {"breathing": 0, "chasing": 0.09, "sparkle": 0},
     }
-    res = requests.get("http://192.168.1.92:81/patterns/active")
-    if res.status_code == 200:  # NOQA
-        return res.json()
-    return off
+    try:
+        res = requests.get(f"http://{IP_ADDRESS}/patterns/active")
+        if res.status_code == 200:  # NOQA
+            return res.json()
+    except:
+        pass
+    return default
 
 
 def getAlpha(pps: float, elapsed: float) -> float:
