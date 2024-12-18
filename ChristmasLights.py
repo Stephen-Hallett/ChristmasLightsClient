@@ -19,6 +19,7 @@ class ChristmasLights(PixelStrip):
         self.decibels: float = 0  # Maximum decibels for pattern
         self.pattern: list = ["#FFFFFF"]
         self.num_starts = 1
+        self.active = [True] * 100  # TODO: Find led var name
 
         # Set up audio device
         FORMAT = pyaudio.paInt16
@@ -64,6 +65,7 @@ class ChristmasLights(PixelStrip):
         self.breathing = pattern["effects"]["breathing"]
         self.decibels = pattern["effects"]["decibels"]
         self.alpha = 1
+        self.active = [True] * 100  # TODO: Find led var name
         self.num_starts = (
             100  # TODO: Find led var name
             * (len(self.pattern) - 1)
@@ -87,10 +89,10 @@ class ChristmasLights(PixelStrip):
             return sum(self.buffer) / len(self.buffer)
         return 0
 
-    def getNewValue(self, pix: str) -> Color:
+    def getNewValue(self, pix: str, i: int) -> Color:
         rgb = self._hex2rgb(pix)
         # Apply sparkle
-        if not self.getSparkle():
+        if i not in self.active:
             return Color(0, 0, 0)
         # Apply breathing
         rgb = tuple([round(val * self.alpha) for val in rgb])
@@ -106,4 +108,4 @@ class ChristmasLights(PixelStrip):
                 self.start_index : self.start_index + 100
             ]  # TODO: Find var name
         for i, pix in enumerate(full_pattern):
-            self[i] = self.getNewValue(pix)
+            self[i] = self.getNewValue(pix, i)
