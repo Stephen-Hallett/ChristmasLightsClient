@@ -21,13 +21,15 @@ SPARKLE_REFRESH = 4
 
 async def update_chasing(lights: ChristmasLights):
     while True:
-        lights.pattern = lights.pattern[-1:] + lights.pattern[:-1]
+        if lights.chasing > 0:
+            lights.pattern = lights.pattern[-1:] + lights.pattern[:-1]
         await asyncio.sleep(lights.chasing)
 
 
 async def update_sparkle(lights: ChristmasLights):
     while True:
-        lights.active = [i for i in range(LED_COUNT) if lights.getSparkle()]
+        if lights.sparkle > 0:
+            lights.active = [i for i in range(LED_COUNT) if lights.getSparkle()]
         await asyncio.sleep(SPARKLE_REFRESH)
 
 
