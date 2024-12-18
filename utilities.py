@@ -3,7 +3,7 @@ from threading import Timer
 
 import requests
 
-IP_ADDRESS = "192.168.1.12:81"
+IP_ADDRESS = "192.168.1.40:81"
 
 
 def getPattern() -> dict:

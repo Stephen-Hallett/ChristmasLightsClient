@@ -1,0 +1,1 @@
+The case here was adapted from [here](https://www.autodesk.com/community/gallery/project/26394/raspberry-pi-zero-case-from-make)

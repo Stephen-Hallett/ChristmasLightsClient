@@ -72,9 +72,12 @@ try:
                 lights.buffer.append(lights.q.get())
             db = sum(lights.buffer) / len(lights.buffer) if lights.buffer else 0
             print(f"Decibels: {db:.2f} dB")
-            lights.start_index = math.floor(
-                min((db / lights.decibels), 0.9999) * lights.num_starts
-            )
+            try:
+                lights.start_index = math.floor(
+                    min((db / lights.decibels), 0.9999) * lights.num_starts
+                )
+            except:
+                pass
         if lights.breathing > 0:
             lights.alpha = getAlpha(lights.breathing, time.time())
         lights.show()
