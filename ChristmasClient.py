@@ -1,8 +1,8 @@
+import asyncio
 import math
 import time
-from functools import partial
 
-from utilities import RepeatedTimer, getAlpha, getPattern
+from utilities import getAlpha, getPattern
 
 from ChristmasLights import ChristmasLights
 
@@ -19,72 +19,78 @@ LED_CHANNEL = 0  # set to '1' for GPIOs 13, 19, 41, 45 or 53
 SPARKLE_REFRESH = 4
 
 
-lights = ChristmasLights(
-    LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL
-)
-
-
-off = {
-    "id": 1,
-    "name": "Off",
-    "pattern": ["#000000"],
-    "active": True,
-    "effects": {"breathing": 0, "chasing": 0, "sparkle": 0, "decibels": 0},
-}
-
-
-def update_chasing(lights: ChristmasLights) -> None:
-    lights.pattern.insert(0, lights.pattern[-1])
-    lights.pattern.pop(-1)
-
-
-chasing_update = partial(update_chasing, lights)
-
-
-def update_sparkle(lights: ChristmasLights) -> None:
-    lights.active = [i for i in range(LED_COUNT) if lights.getSparkle()]
-
-
-sparkle_update = partial(update_sparkle, lights)
-
-try:
-    pattern = getPattern()
-    print(f"Using pattern {pattern['name']}.")
-    start = time.time()
-    lights.setPattern(pattern)
-    lights.begin()
-    chasing_timer = RepeatedTimer(lights.chasing, chasing_update)
-    sparkle_timer = RepeatedTimer(SPARKLE_REFRESH, sparkle_update)
+async def update_chasing(lights: ChristmasLights):
     while True:
-        new_pattern = getPattern()
-        if new_pattern != pattern:
-            pattern = new_pattern
-            lights.setPattern(new_pattern)
-            start = time.time()
-            chasing_timer.stop()
-            sparkle_timer.stop()
-            chasing_timer = RepeatedTimer(lights.chasing, update_chasing, lights)
-            sparkle_timer = RepeatedTimer(SPARKLE_REFRESH, update_sparkle, lights)
+        lights.pattern.insert(0, lights.pattern[-1])
+        lights.pattern.pop(-1)
+        print(f"Chasing pattern updated: {lights.pattern}")
+        await asyncio.sleep(lights.chasing)
 
+
+async def update_sparkle(lights: ChristmasLights):
+    while True:
+        lights.active = [i for i in range(LED_COUNT) if lights.getSparkle()]
+        print(f"Sparkle active LEDs: {lights.active}")
+        await asyncio.sleep(SPARKLE_REFRESH)
+
+
+async def main():
+    lights = ChristmasLights(
+        LED_COUNT,
+        LED_PIN,
+        LED_FREQ_HZ,
+        LED_DMA,
+        LED_INVERT,
+        LED_BRIGHTNESS,
+        LED_CHANNEL,
+    )
+
+    off = {
+        "id": 1,
+        "name": "Off",
+        "pattern": ["#000000"],
+        "active": True,
+        "effects": {"breathing": 0, "chasing": 0, "sparkle": 0, "decibels": 0},
+    }
+
+    try:
+        pattern = getPattern()
+        print(f"Using pattern {pattern['name']}.")
+        lights.setPattern(pattern)
+        lights.begin()
+
+        chasing_task = asyncio.create_task(update_chasing(lights))
+        sparkle_task = asyncio.create_task(update_sparkle(lights))
+        while True:
+            new_pattern = getPattern()
+            if new_pattern != pattern:
+                pattern = new_pattern
+                lights.setPattern(new_pattern)
+
+            lights.setStrip()
+            if lights.decibels:
+                while not lights.q.empty():
+                    lights.buffer.append(lights.q.get())
+                db = sum(lights.buffer) / len(lights.buffer) if lights.buffer else 0
+                print(f"Decibels: {db:.2f} dB")
+                try:
+                    lights.start_index = math.floor(
+                        min((db / lights.decibels), 0.9999) * lights.num_starts
+                    )
+                except Exception as e:
+                    print(f"Error updating start index: {e}")
+
+            if lights.breathing > 0:
+                lights.alpha = getAlpha(lights.breathing, time.time())
+            lights.show()
+            await asyncio.sleep(0.05)
+    except KeyboardInterrupt:
+        lights.setPattern(off)
         lights.setStrip()
-        if lights.decibels:
-            while not lights.q.empty():
-                lights.buffer.append(lights.q.get())
-            db = sum(lights.buffer) / len(lights.buffer) if lights.buffer else 0
-            print(f"Decibels: {db:.2f} dB")
-            try:
-                lights.start_index = math.floor(
-                    min((db / lights.decibels), 0.9999) * lights.num_starts
-                )
-            except:
-                pass
-        if lights.breathing > 0:
-            lights.alpha = getAlpha(lights.breathing, time.time())
         lights.show()
-except KeyboardInterrupt:
-    lights.setPattern(off)
-    lights.setStrip()
-    lights.show()
-    chasing_timer.stop()
-    sparkle_timer.stop()
-    time.sleep(0.1)
+        chasing_task.cancel()
+        sparkle_task.cancel()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
