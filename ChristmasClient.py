@@ -42,7 +42,7 @@ chasing_update = partial(update_chasing, lights)
 
 
 def update_sparkle(lights: ChristmasLights) -> None:
-    lights.active = [lights.getSparkle() for _ in range(LED_COUNT)]
+    lights.active = [i for i in range(LED_COUNT) if lights.getSparkle()]
 
 
 sparkle_update = partial(update_sparkle, lights)
