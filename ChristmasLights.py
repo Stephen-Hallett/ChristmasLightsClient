@@ -25,11 +25,11 @@ class ChristmasLights(PixelStrip):
         FORMAT = pyaudio.paInt16
         CHANNELS = 1
         RATE = 44100
-        CHUNKS_PER_SECOND = 10
+        CHUNKS_PER_SECOND = 8
         CHUNK = round(RATE / CHUNKS_PER_SECOND)
 
         self.q = Queue()
-        self.buffer = deque(maxlen=5)
+        self.buffer = deque(maxlen=1)
         self.stream = pyaudio.PyAudio().open(
             format=FORMAT,
             channels=CHANNELS,
@@ -45,7 +45,10 @@ class ChristmasLights(PixelStrip):
         """
         rms = np.sqrt(np.mean(sig**2))  # Root Mean Square
         if rms > 0.01:
-            return (max(20 * np.log10(rms), 0) - 19) ** 1.5  # Convert to dB
+            try:
+                return (max(20 * np.log10(rms), 0) - 21) ** 1.5  # Convert to dB
+            except:
+                return 0
         return 0  # Handle silence
 
     def _callback(self, input_data, frame_count, time_info, flags):
