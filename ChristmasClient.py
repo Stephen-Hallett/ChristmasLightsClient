@@ -22,8 +22,7 @@ SPARKLE_REFRESH = 4
 async def update_chasing(lights: ChristmasLights):
     while True:
         print(f"Original pattern: {lights.pattern}")
-        lights.pattern.insert(0, lights.pattern[-1])
-        lights.pattern.pop(-1)
+        lights.pattern = lights.pattern[-1:] + lights.pattern[:-1]
         print(f"Chasing pattern updated: {lights.pattern}")
         await asyncio.sleep(lights.chasing)
 
